@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const RAW_URL = import.meta.env.VITE_API_URL || 'https://timbangan-digital-production.up.railway.app';
+const API_BASE_URL = RAW_URL.endsWith('/api') ? RAW_URL : `${RAW_URL.replace(/\/$/, '')}/api`;
 
 /**
  * Ambil token JWT dari localStorage

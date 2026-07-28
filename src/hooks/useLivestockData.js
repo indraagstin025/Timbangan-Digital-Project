@@ -115,8 +115,10 @@ export function useLivestockData() {
       });
     }, 3000);
 
-    // Inisialisasi WebSocket ke Server Backend dengan Auto-Reconnect
-    const wsUrl = 'ws://localhost:5000/ws';
+    const rawApi = import.meta.env.VITE_API_URL || 'https://timbangan-digital-production.up.railway.app';
+    const wsProto = rawApi.startsWith('https') ? 'wss' : 'ws';
+    const wsHost = rawApi.replace(/^https?:\/\//, '').replace(/\/api\/?$/, '').replace(/\/$/, '');
+    const wsUrl = `${wsProto}://${wsHost}/ws`;
     let socket = null;
     let reconnectTimer = null;
     let isUnmounted = false;

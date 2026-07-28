@@ -15,7 +15,7 @@ export function ExportAction({ onExport, filteredCount, selectedBreed = '' }) {
     
     if (type === 'excel' || type === 'csv') {
       try {
-        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+        const baseUrl = import.meta.env.VITE_API_URL || 'https://timbangan-digital-production.up.railway.app/api';
         const token = localStorage.getItem('auth_token') || '';
         const breedParam = selectedBreed && !selectedBreed.includes('Semua') ? `?breed=${encodeURIComponent(selectedBreed)}` : '';
         const url = `${baseUrl}/export/excel${breedParam}`;
