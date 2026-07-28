@@ -35,14 +35,7 @@ export function claimDevice(data) {
  * @param {string} pairingStatus - 'approved' | 'rejected'
  */
 export function approvePairing(id, pairingStatus) {
-  return fetch(`${import.meta.env.VITE_API_URL || 'https://timbangan-digital-production.up.railway.app/api'}/devices/${id}/pairing`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`,
-    },
-    body: JSON.stringify({ pairing_status: pairingStatus }),
-  }).then((r) => r.json());
+  return put(`/devices/${id}/pairing`, { pairing_status: pairingStatus });
 }
 
 /**

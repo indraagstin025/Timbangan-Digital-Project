@@ -11,7 +11,7 @@ export function useCowDetail(cowId) {
   const [recentWeighings, setRecentWeighings] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
+  const fetchData = () => {
     if (!cowId) {
       setPredictionData(null);
       setWeightHistory([]);
@@ -27,19 +27,19 @@ export function useCowDetail(cowId) {
     .then(([predRes, weightRes]) => {
       if (predRes.success) {
         setPredictionData(predRes.data);
+      } else {
+        setPredictionData(null);
       }
       if (weightRes.success) {
-        // Sort weights by date descending to get the 3 most recent
         const sorted = [...weightRes.data].sort(
           (a, b) => new Date(b.measurement_date) - new Date(a.measurement_date)
         );
         setRecentWeighings(sorted.slice(0, 3));
 
-        // Format weights for chart rendering
         const formatted = weightRes.data.map((w) => {
           const date = new Date(w.measurement_date);
           return {
-            name: date.toLocaleDateString('id-ID', { month: 'short' }),
+            name: date.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' }),
             weight: w.weight,
             isPrediction: false
           };
@@ -49,12 +49,17 @@ export function useCowDetail(cowId) {
     })
     .catch((err) => console.error('Failed fetching detail data', err))
     .finally(() => setIsLoading(false));
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [cowId]);
 
   return {
     predictionData,
     weightHistory,
     recentWeighings,
-    isLoading
+    isLoading,
+    refetchData: fetchData
   };
 }

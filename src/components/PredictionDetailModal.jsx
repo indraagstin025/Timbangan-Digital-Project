@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { Cross1Icon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { Cross1Icon, ExclamationTriangleIcon, PlusIcon } from '@radix-ui/react-icons';
 import { useCowDetail } from '../hooks/useCowDetail';
+import { addWeighing } from '../api/weighingApi';
 
 const normalizeStatus = (status) => {
   if (!status) return '';
@@ -10,9 +11,46 @@ const normalizeStatus = (status) => {
 };
 
 export function PredictionDetailModal({ selectedCow, onClose }) {
-  const { predictionData, weightHistory, recentWeighings, isLoading: isLoadingDetail } = useCowDetail(
+  const { predictionData, weightHistory, recentWeighings, isLoading: isLoadingDetail, refetchData } = useCowDetail(
     selectedCow?.id
   );
+
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [weightInput, setWeightInput] = useState('');
+  const [dateInput, setDateInput] = useState(new Date().toISOString().split('T')[0]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleAddWeightSubmit = async (e) => {
+    e.preventDefault();
+    if (!weightInput || parseFloat(weightInput) <= 0) {
+      setErrorMsg('Masukkan bobot sapi yang valid dalam KG');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMsg('');
+    try {
+      const res = await addWeighing({
+        cow_id: selectedCow.id,
+        weight: parseFloat(weightInput),
+        date: dateInput ? new Date(dateInput).toISOString() : new Date().toISOString()
+      });
+
+      if (res && (res.success || res.id)) {
+        setWeightInput('');
+        setShowAddForm(false);
+        refetchData();
+      } else {
+        setErrorMsg(res?.message || 'Gagal menambahkan data penimbangan');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Terjadi kesalahan jaringan atau server');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Dialog.Root open={!!selectedCow} onOpenChange={(open) => !open && onClose()}>
@@ -30,12 +68,72 @@ export function PredictionDetailModal({ selectedCow, onClose }) {
                     {selectedCow.name} ({selectedCow.cow_code})
                   </Dialog.Description>
                 </div>
-                <Dialog.Close className="p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-800 rounded-full transition-colors cursor-pointer">
-                  <Cross1Icon className="w-5 h-5" />
-                </Dialog.Close>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowAddForm(!showAddForm)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-all shadow-xs cursor-pointer"
+                  >
+                    <PlusIcon className="w-4 h-4" />
+                    <span>+ Penimbangan Manual</span>
+                  </button>
+                  <Dialog.Close className="p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-800 rounded-full transition-colors cursor-pointer">
+                    <Cross1Icon className="w-5 h-5" />
+                  </Dialog.Close>
+                </div>
               </div>
 
               <div className="flex-1 overflow-y-auto p-6 bg-slate-50 space-y-6">
+
+                {/* Form Input Manual (Collapsible) */}
+                {showAddForm && (
+                  <div className="max-w-md mx-auto bg-blue-50/70 border border-blue-200 rounded-2xl p-4 space-y-3 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-extrabold text-blue-900 uppercase tracking-wider">Input Penimbangan Manual</h4>
+                      <button onClick={() => setShowAddForm(false)} className="text-xs font-bold text-slate-400 hover:text-slate-600">Batal</button>
+                    </div>
+
+                    {errorMsg && (
+                      <p className="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 p-2 rounded-lg">{errorMsg}</p>
+                    )}
+
+                    <form onSubmit={handleAddWeightSubmit} className="space-y-3">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-600 uppercase">Bobot (KG) *</label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            min="1"
+                            max="1500"
+                            required
+                            placeholder="350.5"
+                            value={weightInput}
+                            onChange={(e) => setWeightInput(e.target.value)}
+                            className="w-full px-3 py-1.5 text-xs font-bold text-slate-900 bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-blue-600"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-600 uppercase">Tanggal *</label>
+                          <input
+                            type="date"
+                            required
+                            value={dateInput}
+                            onChange={(e) => setDateInput(e.target.value)}
+                            className="w-full px-3 py-1.5 text-xs font-bold text-slate-900 bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-blue-600"
+                          />
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="w-full py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        {isSubmitting ? 'Menyimpan...' : 'Simpan Penimbangan'}
+                      </button>
+                    </form>
+                  </div>
+                )}
                 
                 {/* Detailed Information Box */}
                 <div className="max-w-md mx-auto bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-5">
@@ -59,7 +157,7 @@ export function PredictionDetailModal({ selectedCow, onClose }) {
                       <span className="text-slate-900 capitalize">{selectedCow.gender}</span>
                       
                       <span className="text-slate-400">Umur:</span>
-                      <span className="text-slate-900">{selectedCow.ageMonths} bulan</span>
+                      <span className="text-slate-900">{selectedCow.ageMonths || 0} bulan</span>
                     </div>
                   </div>
 
@@ -87,7 +185,7 @@ export function PredictionDetailModal({ selectedCow, onClose }) {
 
                   {/* Riwayat Penimbangan (3 Terakhir) */}
                   <div className="space-y-2">
-                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Riwayat Penimbangan (3 Terakhir)</h4>
+                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Riwayat Penimbangan ({recentWeighings.length} Record)</h4>
                     {recentWeighings.length === 0 ? (
                       <p className="text-[10px] text-slate-400 italic">Belum ada data timbangan.</p>
                     ) : (
@@ -170,7 +268,7 @@ export function PredictionDetailModal({ selectedCow, onClose }) {
 
                       {/* Chart */}
                       <div className="pt-4 border-t border-slate-100">
-                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Grafik Pertumbuhan (3 Bulan)</h4>
+                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Grafik Pertumbuhan & Regresi Linear</h4>
                         <div className="h-48 w-full">
                           <ResponsiveContainer width="100%" height="100%">
                             <LineChart
@@ -211,14 +309,21 @@ export function PredictionDetailModal({ selectedCow, onClose }) {
                             </LineChart>
                           </ResponsiveContainer>
                         </div>
-                        <p className="text-[9px] text-slate-400 mt-3 text-center italic">*Proyeksi regresi linear berdasarkan {predictionData.data_points_used} bulan historis.</p>
+                        <p className="text-[9px] text-slate-400 mt-3 text-center italic">*Proyeksi regresi linear berdasarkan {predictionData.data_points_used} data historis.</p>
                       </div>
 
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-10 space-y-3">
                       <ExclamationTriangleIcon className="w-8 h-8 text-amber-500" />
-                      <p className="text-xs font-semibold text-slate-600 text-center">Data belum cukup (Minimal 3 bulan penimbangan) untuk prediksi</p>
+                      <p className="text-xs font-semibold text-slate-600 text-center">Data belum cukup (Minimal 3 penimbangan) untuk analisis Regresi Linear</p>
+                      <button
+                        onClick={() => setShowAddForm(true)}
+                        className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors cursor-pointer"
+                      >
+                        <PlusIcon className="w-4 h-4" />
+                        <span>Input Penimbangan Ke-{recentWeighings.length + 1}</span>
+                      </button>
                     </div>
                   )}
                 </div>

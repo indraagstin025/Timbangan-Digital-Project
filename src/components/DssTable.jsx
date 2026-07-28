@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import { AddCowModal } from './AddCowModal';
+import { AddWeighingModal } from './AddWeighingModal';
 import { ConfirmModal } from './ConfirmModal';
 import { SelectInput } from './SelectInput';
 import { 
@@ -252,13 +253,15 @@ function DssFilterToolbar({
       </div>
 
       {isAdmin && (
-        <button
-          onClick={() => setIsAddingCow(true)}
-          className="flex items-center justify-center gap-1.5 bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-black border border-black dark:border-white px-4 py-2 rounded-xl text-[12px] font-bold transition-all shadow-xs hover:shadow-sm cursor-pointer shrink-0"
-        >
-          <PlusIcon className="w-4 h-4" />
-          <span>Tambah Sapi Baru</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => setIsAddingCow(true)}
+            className="flex items-center justify-center gap-1.5 bg-black hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-black border border-black dark:border-white px-3.5 py-2 rounded-xl text-[12px] font-bold transition-all shadow-xs hover:shadow-sm cursor-pointer shrink-0"
+          >
+            <PlusIcon className="w-4 h-4" />
+            <span>Tambah Sapi Baru</span>
+          </button>
+        </div>
       )}
     </div>
   );

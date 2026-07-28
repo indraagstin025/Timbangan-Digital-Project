@@ -88,13 +88,16 @@ function AppContent() {
 
         {activeTab === 'growth' && (
           <GrowthPage 
-            growthData={livestockData.growthData} 
+            growthData={livestockData.growthData}
+            cows={livestockData.cows}
+            refreshAllData={livestockData.refreshAllData}
           />
         )}
 
         {activeTab === 'history' && (
           <HistoryPage 
             scaleLogs={livestockData.scaleLogs}
+            cows={livestockData.cows}
             refreshAllData={livestockData.refreshAllData}
           />
         )}

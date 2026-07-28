@@ -1,10 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
+import { PlusIcon } from '@radix-ui/react-icons';
 import { GrowthChart } from '../components/GrowthChart';
+import { AddWeighingModal } from '../components/AddWeighingModal';
 
-export function GrowthPage({ growthData }) {
+export function GrowthPage({ growthData, cows = [], refreshAllData }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="space-y-6">
+      {/* Header Banner & Manual Weighing Button */}
+      <div className="bg-white dark:bg-black rounded-lg p-5 border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors duration-300">
+        <div>
+          <h2 className="text-base font-extrabold text-gray-900 dark:text-white uppercase tracking-wide">
+            Statistik & Analisis Prediksi Pertumbuhan Sapi
+          </h2>
+          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5">
+            Grafik tren bobot harian, estimasi ADG, dan prediksi Regresi Linear Polinomial.
+          </p>
+        </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-xl transition-all shadow-xs cursor-pointer"
+        >
+          <PlusIcon className="w-4 h-4" />
+          <span>+ Input Penimbangan Manual</span>
+        </button>
+      </div>
+
+      {/* Modal Penimbangan Manual */}
+      <AddWeighingModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        cows={cows}
+        onSuccess={refreshAllData}
+      />
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <GrowthChart data={growthData} />

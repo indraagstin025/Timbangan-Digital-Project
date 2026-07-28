@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
-import { ChevronLeftIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { ChevronLeftIcon, ExclamationTriangleIcon, PlusIcon, Cross2Icon } from '@radix-ui/react-icons';
 import { useCowDetail } from '../hooks/useCowDetail';
+import { addWeighing } from '../api/weighingApi';
 
 const normalizeStatus = (status) => {
   if (!status) return '';
@@ -21,7 +22,44 @@ const getDssExplanation = (cow, predictionData) => {
 };
 
 export function CowDetailPage({ cow, onBack }) {
-  const { predictionData, weightHistory, recentWeighings, isLoading: isLoadingDetail } = useCowDetail(cow?.id);
+  const { predictionData, weightHistory, recentWeighings, isLoading: isLoadingDetail, refetchData } = useCowDetail(cow?.id);
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [weightInput, setWeightInput] = useState('');
+  const [dateInput, setDateInput] = useState(new Date().toISOString().split('T')[0]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const handleAddWeightSubmit = async (e) => {
+    e.preventDefault();
+    if (!weightInput || parseFloat(weightInput) <= 0) {
+      setErrorMsg('Masukkan bobot sapi yang valid dalam KG');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMsg('');
+    try {
+      const res = await addWeighing({
+        cow_id: cow.id,
+        weight: parseFloat(weightInput),
+        date: dateInput ? new Date(dateInput).toISOString() : new Date().toISOString()
+      });
+
+      if (res && (res.success || res.id)) {
+        setWeightInput('');
+        setIsModalOpen(false);
+        refetchData();
+      } else {
+        setErrorMsg(res?.message || 'Gagal menambahkan data penimbangan');
+      }
+    } catch (err) {
+      console.error(err);
+      setErrorMsg('Terjadi kesalahan jaringan atau server');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -34,13 +72,94 @@ export function CowDetailPage({ cow, onBack }) {
         <span>Kembali ke DSS</span>
       </button>
 
-      {/* Title */}
-      <div className="flex flex-col gap-1">
-        <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Detail Rekam Medis & Prediksi</h2>
-        <p className="text-xs text-slate-500 font-medium">
-          Sapi: <strong className="text-slate-800 font-bold">{cow.name}</strong> ({cow.cow_code})
-        </p>
+      {/* Header & Manual Entry Button */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200/65 shadow-xs">
+        <div className="flex flex-col gap-0.5">
+          <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Detail Rekam Medis & Prediksi</h2>
+          <p className="text-xs text-slate-500 font-medium">
+            Sapi: <strong className="text-slate-800 font-bold">{cow.name}</strong> ({cow.cow_code}) — {cow.breed}
+          </p>
+        </div>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-xl transition-all shadow-xs cursor-pointer focus:outline-none"
+        >
+          <PlusIcon className="w-4 h-4" />
+          <span>Tambah Data Penimbangan Manual</span>
+        </button>
       </div>
+
+      {/* Modal Input Penimbangan Manual */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-xl w-full max-w-md p-6 space-y-4 relative animate-in fade-in zoom-in-95 duration-150">
+            <button
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+            >
+              <Cross2Icon className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <h3 className="text-base font-extrabold text-slate-900">Tambah Data Penimbangan</h3>
+              <p className="text-xs text-slate-500 font-medium">
+                Masukkan bobot penimbangan manual untuk sapi <strong className="text-slate-800">{cow.name}</strong> ({cow.cow_code}).
+              </p>
+            </div>
+
+            {errorMsg && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs font-bold text-rose-600">
+                {errorMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleAddWeightSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">Bobot Penimbangan (KG) *</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="1"
+                  max="1500"
+                  required
+                  placeholder="Contoh: 350.5"
+                  value={weightInput}
+                  onChange={(e) => setWeightInput(e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs font-bold text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white transition-colors"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">Tanggal Penimbangan *</label>
+                <input
+                  type="date"
+                  required
+                  value={dateInput}
+                  onChange={(e) => setDateInput(e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs font-bold text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white transition-colors"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-xl transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Menyimpan...' : 'Simpan Penimbangan'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Layout Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -236,6 +355,13 @@ export function CowDetailPage({ cow, onBack }) {
             <div className="flex flex-col items-center justify-center py-20 space-y-3">
               <ExclamationTriangleIcon className="w-8 h-8 text-amber-500" />
               <p className="text-xs font-semibold text-slate-650 text-center">Data belum cukup (Minimal 3 bulan penimbangan) untuk prediksi</p>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors cursor-pointer"
+              >
+                <PlusIcon className="w-4 h-4" />
+                <span>Input Data Penimbangan Ke-{weightHistory.length + 1}</span>
+              </button>
             </div>
           )}
         </div>
