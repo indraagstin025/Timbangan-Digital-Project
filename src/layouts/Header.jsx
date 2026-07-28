@@ -29,27 +29,18 @@ export function Header({ activeTab, setActiveTab, setIsSidebarOpen, wsConnected,
             <HamburgerMenuIcon className="w-4 h-4 text-gray-700 dark:text-gray-300" />
           </button>
           <div className="min-w-0">
-            {activeTab === 'control' ? (
-              <>
-                <div className="text-sm lg:text-base font-bold text-black dark:text-white mt-1 truncate transition-colors duration-300">
-                  Panel Kontrol & Live Scale Mirroring
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none font-sans truncate">
-                  Sistem Timbangan Sapi
-                </div>
-                <h2 className="text-sm lg:text-base font-bold text-black dark:text-white mt-1 truncate transition-colors duration-300">
-                  {activeTab === 'dashboard' && 'Dashboard Utama'}
-                  {activeTab === 'dss' && 'Sistem Pendukung Keputusan (DSS)'}
-                  {activeTab === 'growth' && 'Analisis Tren & ADG Sapi'}
-                  {activeTab === 'history' && 'Log Sensor Timbangan IoT'}
-                  {activeTab === 'devices' && 'Perangkat Timbangan ESP32'}
-                  {activeTab === 'export' && 'Ekspor Berkas & Laporan'}
-                </h2>
-              </>
-            )}
+            <div className="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest leading-none font-sans truncate">
+              Sistem Timbangan Sapi
+            </div>
+            <h2 className="text-sm lg:text-base font-bold text-black dark:text-white mt-1 truncate transition-colors duration-300">
+              {activeTab === 'control' && 'Panel Kontrol & Live Scale Mirroring'}
+              {activeTab === 'dashboard' && 'Dashboard Utama'}
+              {activeTab === 'dss' && 'Sistem Pendukung Keputusan (DSS)'}
+              {activeTab === 'growth' && 'Analisis Tren & ADG Sapi'}
+              {activeTab === 'history' && 'Log Sensor Timbangan IoT'}
+              {activeTab === 'devices' && 'Perangkat Timbangan ESP32'}
+              {activeTab === 'export' && 'Ekspor Berkas & Laporan'}
+            </h2>
           </div>
         </div>
         
