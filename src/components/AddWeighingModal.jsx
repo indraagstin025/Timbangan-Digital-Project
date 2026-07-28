@@ -28,7 +28,7 @@ export function AddWeighingModal({ isOpen, onClose, cows = [], onSuccess }) {
       const payload = {
         cow_id: parseInt(selectedCowId, 10),
         weight: parseFloat(weight),
-        date: measurementDate ? new Date(measurementDate).toISOString() : new Date().toISOString()
+        date: measurementDate ? measurementDate : new Date().toISOString().split('T')[0]
       };
 
       const res = await addWeighing(payload);

@@ -152,6 +152,32 @@ export function LiveScaleWidget({ wsConnected, liveWeight, cows = [], activeDevi
     }
   };
 
+  // ── Keyboard Navigation (Remote Rotary Encoder) ──
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore if user is typing in an input or select
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+      if (isSending) return; // Prevent spamming
+
+      if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleCommand('nav_up');
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleCommand('nav_down');
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        handleCommand('nav_click');
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        handleExitMenu();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeDeviceCode, isSending]);
+
   return (
     <div className="bg-transparent text-gray-900 dark:text-white font-sans space-y-4 transition-colors duration-300">
       <style>{`
