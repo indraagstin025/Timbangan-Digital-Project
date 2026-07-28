@@ -1,4 +1,4 @@
-import { get, post, del } from './apiClient';
+import { get, post, put, del } from './apiClient';
 
 /**
  * Ambil semua perangkat (admin view — termasuk pending)

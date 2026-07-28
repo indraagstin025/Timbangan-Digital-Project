@@ -5,7 +5,11 @@ import { get, post } from './apiClient';
  * @param {object} data - { cow_id, weight, date?, device_id? }
  */
 export function addWeighing(data) {
-  return post('/weighings', data);
+  const payload = { ...data };
+  if (payload.date) {
+    payload.date = String(payload.date).split('T')[0];
+  }
+  return post('/weighings', payload);
 }
 
 /**

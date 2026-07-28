@@ -43,7 +43,7 @@ export function CowDetailPage({ cow, onBack }) {
       const res = await addWeighing({
         cow_id: cow.id,
         weight: parseFloat(weightInput),
-        date: dateInput ? new Date(dateInput).toISOString() : new Date().toISOString()
+        date: dateInput ? dateInput : new Date().toISOString().split('T')[0]
       });
 
       if (res && (res.success || res.id)) {
