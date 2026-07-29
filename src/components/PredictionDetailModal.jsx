@@ -24,10 +24,9 @@ export function PredictionDetailModal({ selectedCow, onClose }) {
   const getChartData = () => {
     let data = [...weightHistory];
     if (predictionData && predictionData.projected_points && predictionData.projected_points.length > 0) {
-      predictionData.projected_points.forEach((pt, index) => {
-        const pDate = new Date(pt.date);
+      predictionData.projected_points.forEach((pt) => {
         data.push({
-          name: `Bulan ${index + 1} (${pDate.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })})`,
+          name: `Bln ${pt.month}`,
           weight: pt.weight,
           isPrediction: true
         });

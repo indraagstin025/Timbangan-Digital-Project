@@ -32,10 +32,9 @@ export function CowDetailPage({ cow, onBack }) {
 
   const chartData = [...weightHistory];
   if (predictionData && predictionData.projected_points && predictionData.projected_points.length > 0) {
-    predictionData.projected_points.forEach((pt, index) => {
-      const predDate = new Date(pt.date);
+    predictionData.projected_points.forEach((pt) => {
       chartData.push({
-        name: `Bulan ${index + 1} (${predDate.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })})`,
+        name: `Bln ${pt.month}`,
         weight: pt.weight,
         isPrediction: true
       });
