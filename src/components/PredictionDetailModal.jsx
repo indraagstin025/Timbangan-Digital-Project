@@ -197,7 +197,7 @@ export function PredictionDetailModal({ selectedCow, onClose }) {
                       <span className={`font-bold ${
                         selectedCow.last_adg >= 0.3 ? 'text-emerald-600' : 'text-slate-900'
                       }`}>
-                        {selectedCow.last_adg > 0 ? '+' : ''}{selectedCow.last_adg} Kg/hr
+                        {selectedCow.last_adg > 0 ? '+' : ''}{Number(selectedCow.last_adg).toFixed(2)} Kg/hari
                       </span>
                     </div>
                   </div>
@@ -226,7 +226,7 @@ export function PredictionDetailModal({ selectedCow, onClose }) {
                                 <span className="font-bold text-slate-800">{w.weight} Kg</span>
                                 {w.adg !== undefined && w.adg !== null && (
                                   <span className={`text-[10px] ${w.adg >= 0.3 ? 'text-emerald-600' : w.adg > 0 ? 'text-blue-600' : 'text-rose-600'}`}>
-                                    ({w.adg > 0 ? '+' : ''}{w.adg.toFixed(1)} Kg/d)
+                                    ({w.adg > 0 ? '+' : ''}{Number(w.adg).toFixed(2)} Kg/hari)
                                   </span>
                                 )}
                               </div>
