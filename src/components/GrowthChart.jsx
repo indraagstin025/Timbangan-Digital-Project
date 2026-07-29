@@ -22,11 +22,30 @@ export function GrowthChart({ data }) {
 
   const chartData = getFilteredData();
 
+  // ── Empty state: tidak ada data sama sekali
+  if (!chartData || chartData.length === 0) {
+    return (
+      <div id="growth-chart-container" className="bg-white dark:bg-black rounded-lg p-4 border border-gray-200 dark:border-gray-800 shadow-sm flex flex-col h-full items-center justify-center min-h-[300px] transition-colors duration-300">
+        <div className="text-center space-y-3">
+          <div className="text-4xl">📊</div>
+          <div className="font-bold text-sm text-gray-900 dark:text-white">Belum Ada Data Penimbangan</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">
+            Tambahkan minimal <strong>1 data penimbangan</strong> menggunakan tombol
+            <strong> "+ Input Penimbangan Manual"</strong> di atas, lalu grafik akan otomatis muncul.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Determine min and max values for scaling
   const values = chartData.map((d) => (activeMetric === 'berat' ? d.beratRataRata : d.adgRataRata));
-  const maxVal = Math.max(...values) * 1.05;
-  const minVal = Math.min(...values) * 0.95;
-  const valRange = maxVal - minVal;
+  const rawMax = Math.max(...values);
+  const rawMin = Math.min(...values);
+  // Jika hanya 1 titik, beri padding 10% atas dan bawah agar titik tidak mepet tepi
+  const maxVal = chartData.length === 1 ? rawMax * 1.15 : rawMax * 1.05;
+  const minVal = chartData.length === 1 ? rawMin * 0.85 : rawMin * 0.95;
+  const valRange = maxVal - minVal || 1; // Hindari division by zero jika semua nilai sama
 
   // Chart dimensions
   const svgWidth = 700;
@@ -39,10 +58,11 @@ export function GrowthChart({ data }) {
   const chartWidth = svgWidth - paddingLeft - paddingRight;
   const chartHeight = svgHeight - paddingTop - paddingBottom;
 
-  // Calculate coordinates
+  // Calculate coordinates — jika hanya 1 titik, letakkan di tengah
   const points = chartData.map((d, index) => {
     const val = activeMetric === 'berat' ? d.beratRataRata : d.adgRataRata;
-    const x = paddingLeft + (index / (chartData.length - 1)) * chartWidth;
+    const xRatio = chartData.length === 1 ? 0.5 : index / (chartData.length - 1);
+    const x = paddingLeft + xRatio * chartWidth;
     const y = paddingTop + chartHeight - ((val - minVal) / valRange) * chartHeight;
     return { x, y, data: d };
   });

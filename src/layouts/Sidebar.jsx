@@ -31,6 +31,7 @@ export function Sidebar({ activeTab, setActiveTab, isSidebarOpen, setIsSidebarOp
     { id: 'history', label: 'Histori Timbangan', desc: 'Stream log IoT ESP32', icon: MixerHorizontalIcon },
     { id: 'devices', label: 'Perangkat Saya', desc: 'Pairing timbangan ESP32', icon: MixerHorizontalIcon },
     { id: 'export', label: 'Ekspor Laporan', desc: 'Unduh data PDF/CSV', icon: FileTextIcon },
+    { id: 'profile', label: 'Profil Saya', desc: 'Username & password', icon: PersonIcon },
   ];
 
 

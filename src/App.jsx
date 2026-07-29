@@ -13,6 +13,7 @@ import { HistoryPage } from './pages/HistoryPage';
 import { ExportPage } from './pages/ExportPage';
 import { CowDetailPage } from './pages/CowDetailPage';
 import { DevicesPage } from './pages/DevicesPage';
+import { ProfilePage } from './pages/ProfilePage';
 import LandingPage from './pages/LandingPage';
 import { ThemeProvider } from './contexts/ThemeContext';
 
@@ -108,6 +109,10 @@ function AppContent() {
 
         {activeTab === 'devices' && (
           <DevicesPage />
+        )}
+
+        {activeTab === 'profile' && (
+          <ProfilePage />
         )}
       </MainLayout>
   );
