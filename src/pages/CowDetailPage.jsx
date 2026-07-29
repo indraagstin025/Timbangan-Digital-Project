@@ -306,7 +306,8 @@ export function CowDetailPage({ cow, onBack }) {
             <div className="relative z-10 space-y-6">
               
               {/* Stats Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                {/* Akurasi card */}
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Akurasi Prediksi (R²)</p>
                   <div className="flex items-baseline gap-1.5">
@@ -314,14 +315,36 @@ export function CowDetailPage({ cow, onBack }) {
                     <span className="text-[10px] text-slate-500 font-bold uppercase">Akurasi {predictionData.accuracy_category}</span>
                   </div>
                 </div>
-                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Proyeksi Bobot ({predictionData.horizon_days} Hari)</p>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-xl font-black text-blue-600">{predictionData.predicted_weight}</span>
-                    <span className="text-xs font-bold text-blue-400">Kg</span>
+
+                {/* 3 Monthly projection cards */}
+                {predictionData.projected_points && predictionData.projected_points.length > 0 ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    {predictionData.projected_points.map((pt) => (
+                      <div key={pt.month} className="bg-blue-50 border border-blue-100 p-3 rounded-xl text-center">
+                        <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">
+                          Bulan {pt.month}
+                        </p>
+                        <p className="text-[9px] text-slate-400 mb-1">
+                          +{pt.month * 30} hari
+                        </p>
+                        <div className="flex items-baseline justify-center gap-0.5">
+                          <span className="text-lg font-black text-blue-600">{pt.weight}</span>
+                          <span className="text-[10px] font-bold text-blue-400">Kg</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                ) : (
+                  <div className="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Proyeksi Bobot (90 Hari)</p>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className="text-xl font-black text-blue-600">{predictionData.predicted_weight}</span>
+                      <span className="text-xs font-bold text-blue-400">Kg</span>
+                    </div>
+                  </div>
+                )}
               </div>
+
 
               {/* Growth Chart */}
               <div className="pt-6 border-t border-slate-100">
