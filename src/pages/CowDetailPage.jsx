@@ -30,6 +30,26 @@ export function CowDetailPage({ cow, onBack }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const chartData = [...weightHistory];
+  if (predictionData && predictionData.projected_points && predictionData.projected_points.length > 0) {
+    predictionData.projected_points.forEach((pt, index) => {
+      const predDate = new Date(pt.date);
+      chartData.push({
+        name: `Bulan ${index + 1} (${predDate.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })})`,
+        weight: pt.weight,
+        isPrediction: true
+      });
+    });
+  } else if (predictionData && predictionData.predicted_weight) {
+    const predDate = new Date(predictionData.prediction_date);
+    chartData.push({
+      name: `Prediksi (${predDate.toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })})`,
+      weight: predictionData.predicted_weight,
+      isPrediction: true
+    });
+  }
+
+
   const handleAddWeightSubmit = async (e) => {
     e.preventDefault();
     if (!weightInput || parseFloat(weightInput) <= 0) {
@@ -310,11 +330,7 @@ export function CowDetailPage({ cow, onBack }) {
                 <div className="h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart
-                      data={[...weightHistory, {
-                        name: 'Prediksi',
-                        weight: predictionData.predicted_weight,
-                        isPrediction: true
-                      }]}
+                      data={chartData}
                       margin={{ top: 5, right: 10, left: -20, bottom: 5 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
