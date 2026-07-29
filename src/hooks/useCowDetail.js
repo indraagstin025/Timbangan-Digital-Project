@@ -21,7 +21,7 @@ export function useCowDetail(cowId) {
 
     setIsLoading(true);
     Promise.all([
-      getCowPrediction(cowId, 30),
+      getCowPrediction(cowId, 90),
       getCowWeights(cowId)
     ])
     .then(([predRes, weightRes]) => {

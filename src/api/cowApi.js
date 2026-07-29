@@ -49,7 +49,7 @@ export function deleteCow(id) {
  * @param {number} horizon - jumlah hari ke depan (default 30)
  * Response: { success, data: PredictionResponse }
  */
-export function getCowPrediction(id, horizon = 30) {
+export function getCowPrediction(id, horizon = 90) {
   return get(`/cows/${id}/prediction?horizon=${horizon}`);
 }
 
